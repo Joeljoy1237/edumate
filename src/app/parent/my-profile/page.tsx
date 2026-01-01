@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { db } from "../../../config/firebaseConfig";
 import toast from "react-hot-toast";
@@ -104,8 +104,9 @@ export default function MyProfile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("File details too large (max 2MB)");
+    // Limit to 500KB to ensure Base64 string fits in Firestore document (1MB limit)
+    if (file.size > 0.5 * 1024 * 1024) {
+      toast.error("File size too large. Please upload an image under 500KB.");
       return;
     }
 
@@ -125,8 +126,8 @@ export default function MyProfile() {
     const toastId = toast.loading("Saving changes...");
 
     try {
-        // 1. Update Firestore Profile
-        await updateDoc(doc(db, "parents", user.uid), {
+        // 1. Update Firestore Profile (using setDoc with merge to create if missing)
+        await setDoc(doc(db, "parents", user.uid), {
             name: parentData.name,
             email: parentData.email,
             phone: parentData.phone,
@@ -134,7 +135,9 @@ export default function MyProfile() {
             occupation: parentData.occupation,
             relationship: parentData.relationship,
             photoUrl: parentData.photoUrl
-        });
+        }, { merge: true });
+
+        // ... rest of logic remains similar
 
         // 2. Handle Password Change (if provided)
         if (passwords.new) {
@@ -182,7 +185,7 @@ export default function MyProfile() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col mt-[80px] p-6 mb-[50px]">
-      <div className="max-w-4xl mx-auto w-full">
+      <div className=" w-full">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {/* Header */}
             <div className="p-6 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
