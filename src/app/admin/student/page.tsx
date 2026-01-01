@@ -8,6 +8,8 @@ import toast from 'react-hot-toast'
 
 export default function page() {
   const [students, setStudents] = useState<any[]>([])
+  const [departments, setDepartments] = useState<any[]>([])
+  const [selectedDept, setSelectedDept] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -16,12 +18,18 @@ export default function page() {
     setError(null);
     try {
         console.log("Attempting to fetch students...");
-        // const q = query(collection(db, "students"), orderBy("createdAt", "desc"));
-        const querySnapshot = await getDocs(collection(db, "students"));
-        
-        console.log("Data fetched:", querySnapshot.size);
-        const list = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setStudents(list);
+        // Fetch Students
+        const studentsSnapshot = await getDocs(collection(db, "students"));
+        const studentList = studentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setStudents(studentList);
+
+        // Fetch Departments for Filter
+        const deptSnapshot = await getDocs(collection(db, "departments"));
+        const deptList = deptSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // Sort departments alphabetically
+        deptList.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
+        setDepartments(deptList);
+
     } catch (err: any) {
         console.error("Fetch error:", err);
         setError(err.message);
@@ -55,6 +63,8 @@ export default function page() {
     try {
       await deleteDoc(doc(db, "students", id))
       toast.success("Student deleted successfully")
+      // Update local state without refetching for speed
+      setStudents(prev => prev.filter(s => s.id !== id));
     } catch (error) {
       console.error(error)
       toast.error("Failed to delete student")
@@ -66,6 +76,8 @@ export default function page() {
       try {
           await updateDoc(doc(db, "students", id), { status: newStatus });
           toast.success(`Student status updated to ${newStatus}`);
+          // Update local state
+          setStudents(prev => prev.map(s => s.id === id ? { ...s, status: newStatus } : s));
       } catch (error) {
           console.error(error);
           toast.error("Failed to update status");
@@ -116,6 +128,7 @@ export default function page() {
 
             await batch.commit();
             toast.success(`Successfully added ${count} students`);
+            fetchStudents(); // Refresh list
             
         } catch (error: any) {
             console.error("Bulk upload error:", error);
@@ -125,8 +138,13 @@ export default function page() {
     reader.readAsBinaryString(file);
   }
 
+  // Filter students based on selected department
+  const filteredStudents = selectedDept 
+    ? students.filter(student => student.department === selectedDept)
+    : students;
+
   const QuickActions = () => (
-    <div className="flex space-x-4 mb-6">
+    <div className="flex flex-wrap items-center gap-4 mb-6">
       <Link href="/admin/student/add">
         <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
             Add New Student
@@ -148,12 +166,24 @@ export default function page() {
       <button className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
         Export Data
       </button>
+
+      {/* Department Filter Dropdown */}
+      <select 
+         value={selectedDept}
+         onChange={(e) => setSelectedDept(e.target.value)}
+         className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer min-w-[200px]"
+      >
+          <option value="">All Departments</option>
+          {departments.map((dept: any) => (
+              <option key={dept.id} value={dept.name}>{dept.name}</option>
+          ))}
+      </select>
     </div>
   )
 
-  const totalActive = students.filter(s => s.status === 'active').length
-  const totalAttendanceAvg = students.length > 0 
-    ? students.reduce((sum, s) => sum + (parseFloat(s.attendance) || 0), 0) / students.length 
+  const totalActive = filteredStudents.filter(s => s.status === 'active').length
+  const totalAttendanceAvg = filteredStudents.length > 0 
+    ? filteredStudents.reduce((sum, s) => sum + (parseFloat(s.attendance) || 0), 0) / filteredStudents.length 
     : 0
 
   if (loading) return (
@@ -192,9 +222,9 @@ export default function page() {
 
         {/* Students Table */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        {students.length === 0 ? (
+        {filteredStudents.length === 0 ? (
             <div className="p-12 text-center">
-                <p className="text-xl text-gray-500 mb-4">No students found</p>
+                <p className="text-xl text-gray-500 mb-4">No students found matching current filters</p>
                 <Link href="/admin/student/add">
                     <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                         Add Your First Student
@@ -214,7 +244,7 @@ export default function page() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {students.map((student) => (
+              {filteredStudents.map((student) => (
                 <tr key={student.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{student.regNumber}</div>
@@ -261,7 +291,7 @@ export default function page() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
           <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Students</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-1">{students.length}</p>
+            <p className="text-3xl font-bold text-gray-900 mt-1">{filteredStudents.length}</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Active Students</h3>
@@ -274,7 +304,7 @@ export default function page() {
           <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Departments</h3>
             <p className="text-3xl font-bold text-gray-900 mt-1">
-              {new Set(students.map(s => s.department)).size}
+              {new Set(filteredStudents.map(s => s.department)).size}
             </p>
           </div>
         </div>

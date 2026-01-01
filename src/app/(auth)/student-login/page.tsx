@@ -1,7 +1,7 @@
 "use client"
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
 import { useRouter } from 'next/navigation'
 import { auth } from '../../../config/firebaseConfig'
 import { useAuth } from '../../../context/AuthContext'
@@ -12,6 +12,11 @@ export default function StudentLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  
+  // Forgot Password State
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+
   const router = useRouter()
 
   useEffect(() => {
@@ -64,6 +69,25 @@ export default function StudentLogin() {
       setLoading(false)
     }
   }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail) {
+        toast.error("Please enter your email address.");
+        return;
+    }
+    const toastId = toast.loading("Sending reset email...");
+    try {
+        await sendPasswordResetEmail(auth, resetEmail);
+        toast.success("Password reset email sent! Check your inbox.", { id: toastId });
+        setShowForgotPassword(false);
+        setResetEmail("");
+    } catch (error: any) {
+        console.error(error);
+        const message = getErrorMessage(error.code);
+        toast.error(message, { id: toastId });
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -130,9 +154,13 @@ export default function StudentLogin() {
                 <input id="remember_me" name="remember_me" type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"/>
                 <label htmlFor="remember_me" className="ml-2 block text-gray-600">Remember me</label>
             </div>
-            <a href="#" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
+            <button
+                type="button" 
+                onClick={() => setShowForgotPassword(true)}
+                className="text-blue-600 hover:text-blue-700 font-medium hover:underline focus:outline-none"
+            >
               Forgot Password?
-            </a>
+            </button>
           </div>
 
           <button
@@ -162,6 +190,55 @@ export default function StudentLogin() {
           </div>
         </form>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl p-6 w-[90%] max-w-sm shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
+                <div className="text-center mb-6">
+                    <h3 className="text-xl font-bold text-gray-900">Reset Password</h3>
+                    <p className="text-gray-500 text-sm mt-1">Enter your email to receive a reset link</p>
+                </div>
+                
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <div>
+                        <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700 ml-1 mb-1">
+                            Email Address
+                        </label>
+                        <input
+                            type="email"
+                            id="reset-email"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                            required
+                            className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                            placeholder="Entet your registered email"
+                            autoFocus
+                        />
+                    </div>
+                    
+                    <div className="flex gap-3 mt-6">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setShowForgotPassword(false);
+                                setResetEmail("");
+                            }}
+                            className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            Send Link
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+      )}
     </div>
   )
 }
