@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react'
-import { collection, onSnapshot, deleteDoc, doc } from 'firebase/firestore'
+import { collection, onSnapshot, deleteDoc, doc, getDocs } from 'firebase/firestore'
 import { db } from '../../../config/firebaseConfig'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
@@ -8,9 +8,26 @@ import * as XLSX from 'xlsx'
 
 export default function FacultyPage() {
   const [faculties, setFaculties] = useState<any[]>([])
+  const [departments, setDepartments] = useState<any[]>([])
+  const [selectedDept, setSelectedDept] = useState<string>('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Fetch Departments for Filter
+    const fetchDepartments = async () => {
+        try {
+            const deptSnapshot = await getDocs(collection(db, "departments"));
+            const deptList = deptSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // Sort departments alphabetically
+            deptList.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
+            setDepartments(deptList);
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to load departments");
+        }
+    };
+    fetchDepartments();
+
     const unsub = onSnapshot(collection(db, "faculty"), (snapshot) => {
         const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
         setFaculties(list)
@@ -68,6 +85,10 @@ export default function FacultyPage() {
     return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
   }
 
+  const filteredFaculties = selectedDept 
+    ? faculties.filter(f => f.department === selectedDept)
+    : faculties
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -84,7 +105,7 @@ export default function FacultyPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="flex space-x-4 mb-6">
+        <div className="flex flex-wrap items-center gap-4 mb-6">
             <Link href="/admin/faculty/add">
                 <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
                     Add New Faculty
@@ -96,13 +117,24 @@ export default function FacultyPage() {
             >
                 Export Data
             </button>
+             {/* Department Filter Dropdown */}
+            <select 
+                value={selectedDept}
+                onChange={(e) => setSelectedDept(e.target.value)}
+                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer min-w-[200px]"
+            >
+                <option value="">All Departments</option>
+                {departments.map((dept: any) => (
+                    <option key={dept.id} value={dept.name}>{dept.name}</option>
+                ))}
+            </select>
         </div>
 
         {/* Faculty Table */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-         {faculties.length === 0 ? (
+         {filteredFaculties.length === 0 ? (
              <div className="p-8 text-center text-gray-500">
-                No faculty found. Add one to get started.
+                No faculty found matching filters.
              </div>
           ) : (
           <table className="min-w-full divide-y divide-gray-200">
@@ -117,7 +149,7 @@ export default function FacultyPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {faculties.map((faculty) => (
+              {filteredFaculties.map((faculty) => (
                 <tr key={faculty.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{faculty.uid}</div>
@@ -140,6 +172,9 @@ export default function FacultyPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                    <Link href={`/admin/faculty/edit/${faculty.id}`}>
+                        <button className="text-blue-600 hover:text-blue-900">Edit</button>
+                    </Link>
                     <button onClick={() => handleDelete(faculty.id)} className="text-red-600 hover:text-red-900">Delete</button>
                   </td>
                 </tr>
@@ -153,22 +188,22 @@ export default function FacultyPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
           <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Faculty</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-1">{faculties.length}</p>
+            <p className="text-3xl font-bold text-gray-900 mt-1">{filteredFaculties.length}</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Active Faculty</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-1">{faculties.filter(f => f.accessStatus === 'active').length}</p>
+            <p className="text-3xl font-bold text-gray-900 mt-1">{filteredFaculties.filter(f => f.accessStatus === 'active').length}</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Faculty Roles</h3>
             <p className="text-3xl font-bold text-gray-900 mt-1">
-              {faculties.filter(f => f.role === 'Faculty').length} Faculty
+              {filteredFaculties.filter(f => f.role === 'Faculty').length} Faculty
             </p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Departments Covered</h3>
             <p className="text-3xl font-bold text-gray-900 mt-1">
-              {new Set(faculties.map(f => f.department)).size}
+              {new Set(filteredFaculties.map(f => f.department)).size}
             </p>
           </div>
         </div>

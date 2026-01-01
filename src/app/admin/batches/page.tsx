@@ -1,14 +1,18 @@
 "use client"
 import React, { useState, useEffect } from 'react'
-import { collection, onSnapshot, deleteDoc, doc } from 'firebase/firestore'
+import { collection, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import { db } from '../../../config/firebaseConfig'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import * as XLSX from 'xlsx'
+import { FaGraduationCap, FaArrowUp } from 'react-icons/fa'
 
 export default function BatchesPage() {
   const [batches, setBatches] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
+  const [selectedBatch, setSelectedBatch] = useState<any>(null)
+  const [newSemester, setNewSemester] = useState('')
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "batches"), (snapshot) => {
@@ -54,6 +58,37 @@ export default function BatchesPage() {
 
   const getStatusColor = (status: string) => {
     return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+  }
+
+  const openUpgradeModal = (batch: any) => {
+      setSelectedBatch(batch);
+      // Auto-suggest next semester
+      const currentSem = batch.semester;
+      const match = currentSem.match(/\d+/); // Extract number
+      if (match) {
+          const num = parseInt(match[0]);
+          setNewSemester(currentSem.replace(/\d+/, num + 1));
+      } else {
+          setNewSemester(currentSem + " (Next)");
+      }
+      setUpgradeModalOpen(true);
+  }
+
+  const handleUpgradeSemester = async () => {
+      if (!selectedBatch || !newSemester) return;
+      
+      try {
+          await updateDoc(doc(db, "batches", selectedBatch.id), {
+              semester: newSemester,
+              lastUpdated: new Date().toISOString()
+          });
+          toast.success(`Batch upgraded to ${newSemester}`);
+          setUpgradeModalOpen(false);
+          setSelectedBatch(null);
+      } catch (error) {
+          console.error(error);
+          toast.error("Failed to upgrade semester");
+      }
   }
 
   if (loading) return (
@@ -110,7 +145,7 @@ export default function BatchesPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{batch.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{batch.department}</div>
-                    <div className="text-sm text-gray-500">{batch.semester}</div>
+                    <div className="text-sm font-bold text-blue-600">{batch.semester}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{batch.tutor || 'Not Assigned'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{batch.academicYear}</td>
@@ -119,11 +154,23 @@ export default function BatchesPage() {
                       {(batch.status || 'active').charAt(0).toUpperCase() + (batch.status || 'active').slice(1)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button onClick={() => handleDelete(batch.id)} className="text-red-600 hover:text-red-900">Delete</button>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-3">
+                    <button 
+                        onClick={() => openUpgradeModal(batch)}
+                        title="Upgrade Semester"
+                        className="text-green-600 hover:text-green-800 hover:bg-green-50 p-1.5 rounded transition-colors"
+                    >
+                         <FaArrowUp />
+                    </button>
                     <Link href={`/admin/batches/edit/${batch.id}`}>
-                        <button className="text-blue-600 hover:text-blue-900">Edit</button>
+                        <button className="text-blue-600 hover:text-blue-900 hover:bg-blue-50 p-1.5 rounded transition-colors">Edit</button>
                     </Link>
+                    <button 
+                        onClick={() => handleDelete(batch.id)} 
+                        className="text-red-600 hover:text-red-900 hover:bg-red-50 p-1.5 rounded transition-colors"
+                    >
+                        Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -153,6 +200,47 @@ export default function BatchesPage() {
             </p>
           </div>
         </div>
+
+        {/* Upgrade Modal */}
+        {upgradeModalOpen && selectedBatch && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                <div className="bg-white rounded-xl shadow-2xl p-6 w-[400px] animate-in zoom-in-95 duration-200">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">Upgrade Semester</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                        Promote <strong>{selectedBatch.name}</strong> to the next semester.
+                    </p>
+                    
+                    <div className="mb-6">
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Current Semester</label>
+                        <div className="text-gray-900 font-medium mb-3">{selectedBatch.semester}</div>
+
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">New Semester Name</label>
+                        <input 
+                            type="text" 
+                            value={newSemester}
+                            onChange={(e) => setNewSemester(e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        />
+                    </div>
+
+                    <div className="flex gap-3 justify-end">
+                        <button 
+                            onClick={() => setUpgradeModalOpen(false)}
+                            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                            Cancel
+                        </button>
+                         <button 
+                            onClick={handleUpgradeSemester}
+                            className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                            <FaArrowUp className="text-sm"/>
+                            Confirm Upgrade
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
       </div>
     </div>
   )
