@@ -1,10 +1,10 @@
 "use client"
 import React, { useState, useEffect } from 'react'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
-import { db } from '../../../../config/firebaseConfig'
 import { useRouter, useParams } from 'next/navigation'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
+import { db } from '../../../../../config/firebaseConfig'
 
 export default function EditDepartment() {
   const router = useRouter()
