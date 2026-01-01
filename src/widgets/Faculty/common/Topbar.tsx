@@ -2,20 +2,48 @@
 import Image from "next/image";
 import React, { useEffect, useState, useRef } from "react";
 import { IoIosNotificationsOutline } from "react-icons/io";
+import { FaSearch } from "react-icons/fa";
 import { useAuth } from "../../../context/AuthContext";
 import { doc, getDoc, collection, onSnapshot, query, orderBy, limit, updateDoc } from "firebase/firestore";
 import { db } from "../../../config/firebaseConfig";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+
+// Define searchable faculty routes
+const facultySearchRoutes = [
+    { title: "Dashboard", link: "/faculty/dashboard" },
+    { title: "My Profile", link: "/faculty/profile" },
+    { title: "My Attendance", link: "/faculty/my-attendance" },
+    { title: "Time Table", link: "/faculty/timetable" },
+    { title: "Student Attendance", link: "/faculty/attendance" }, // Assuming this exists or will exist logic
+    { title: "Leave Management", link: "/faculty/leave-management" },
+    { title: "Student Leaves", link: "/faculty/student-leave-management" },
+    { title: "Exam Section", link: "/faculty/exam" },
+    { title: "Evaluations", link: "/faculty/evaluation" },
+    { title: "My Documents", link: "/faculty/my-documents" },
+    { title: "File Storage", link: "/faculty/file-storage" },
+    { title: "Message Box", link: "/faculty/message-box" },
+    { title: "Staff Appraisal", link: "/faculty/staff-appraisal" },
+    { title: "Committees", link: "/faculty/committees" },
+    { title: "Transport", link: "/faculty/transport" },
+    { title: "Rules & Regulations", link: "/faculty/rules-and-regulations" },
+];
 
 export default function Topbar() {
   const { user } = useAuth();
+  const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   
   // Notification State
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Search State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<typeof facultySearchRoutes>([]);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   // Fetch Profile
   useEffect(() => {
@@ -57,11 +85,33 @@ export default function Topbar() {
     return () => unsubscribe();
   }, []);
 
-  // Close dropdown on outside click
+  // Handle Search
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+        setSearchResults([]);
+    } else {
+        const lowerQ = searchQuery.toLowerCase();
+        const results = facultySearchRoutes.filter(route => 
+            route.title.toLowerCase().includes(lowerQ)
+        );
+        setSearchResults(results);
+    }
+  }, [searchQuery]);
+
+  const handleSearchSelect = (link: string) => {
+      router.push(link);
+      setSearchQuery("");
+      setSearchResults([]);
+  }
+
+  // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowNotifications(false);
+      }
+       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setSearchResults([]);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -85,12 +135,62 @@ export default function Topbar() {
   };
 
   return (
-    <div className="h-[11vh] fixed bg-white w-[82vw] flex flex-row items-center justify-between px-[2vw] shadow-sm z-30">
-      <div className="">
-        <span className="font-semibold text-xl text-primary">
+    <div className="h-[11vh] fixed bg-white/80 backdrop-blur-md w-[82vw] flex flex-row items-center justify-between px-[2vw] shadow-sm z-30 border-b border-gray-100/50">
+      <div className="flex items-center gap-10">
+        <span className="font-bold text-xl bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
             Welcome, {profile?.name || "Faculty Member"}👋
         </span>
+
+        {/* Search Bar */}
+        <div className="relative group" ref={searchRef}>
+            <div className={`flex items-center bg-gray-50/80 hover:bg-white border text-gray-600 rounded-full px-5 py-2.5 w-[350px] transition-all duration-300 ease-in-out
+                ${searchResults.length > 0 || searchQuery ? 'bg-white shadow-lg ring-2 ring-blue-500/10 border-blue-100' : 'border-transparent hover:shadow-md hover:border-gray-200'}
+            `}>
+                <FaSearch className={`mr-3 text-lg transition-colors ${searchResults.length > 0 ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500'}`} />
+                <input 
+                    type="text" 
+                    placeholder="Quick Search (e.g. 'Attendance')..." 
+                    className="bg-transparent border-none outline-none text-sm w-full placeholder-gray-400/80 font-medium"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
+
+            {/* Search Results Dropdown */}
+            {searchResults.length > 0 && (
+                <div className="absolute top-14 left-0 w-full bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 overflow-hidden z-[60] animate-in fade-in slide-in-from-top-4 duration-200">
+                    <div className="p-2 bg-gray-50/50 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider px-4">
+                        Search Results
+                    </div>
+                    <div className="max-h-[350px] overflow-y-auto py-1">
+                        {searchResults.map((result, index) => (
+                            <div 
+                                key={index}
+                                onClick={() => handleSearchSelect(result.link)}
+                                className="px-4 py-3 hover:bg-blue-50/50 cursor-pointer flex items-center justify-between group transition-colors duration-150"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-blue-100/50 text-blue-600 flex items-center justify-center text-xs group-hover:bg-blue-500 group-hover:text-white transition-all">
+                                        <FaSearch className="text-sm"/>
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-700 group-hover:text-blue-700 transition-colors">
+                                        {result.title}
+                                    </span>
+                                </div>
+                                <span className="text-[10px] text-gray-400 border border-gray-100 px-2 py-0.5 rounded-full group-hover:border-blue-200 group-hover:text-blue-500 transition-all">
+                                    Jump to ↵
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="p-2 bg-gray-50 border-t border-gray-100 text-center">
+                         <span className="text-[10px] text-gray-400">Press Esc to close</span>
+                    </div>
+                </div>
+            )}
+        </div>
       </div>
+
       <div className="flex flex-row gap-5 items-center">
         
         {/* Notifications */}
