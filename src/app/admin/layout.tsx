@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import "@styles/scss/main.scss";
 import Sidebar from "@widgets/Admin/Sidebar";
 import Topbar from "@widgets/Admin/Topbar";
@@ -14,12 +14,25 @@ export default function Layout({
 }>) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push("/admin-login");
     }
   }, [user, loading, router]);
+
+  // Close mobile menu when screen size changes to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   if (loading) {
     return (
@@ -30,22 +43,26 @@ export default function Layout({
   }
 
   if (!user) {
-      return (
-        <div className="w-screen h-screen flex items-center justify-center bg-gray-50">
-          <p>Redirecting to login...</p>
-        </div>
-      );
+    return (
+      <div className="w-screen h-screen flex items-center justify-center bg-gray-50">
+        <p>Redirecting to login...</p>
+      </div>
+    );
   }
 
   return (
     <div className="w-screen h-screen flex flex-row overflow-x-hidden">
-        <Sidebar />
-      <div className="flex flex-col w-[87vw] ml-[18vw]">
-      <Topbar />
-        <div className="bg-primary/5 h-full w-full">
-            {children}
+      <Sidebar
+        isMobileOpen={isMobileMenuOpen}
+        onMobileClose={() => setIsMobileMenuOpen(false)}
+      />
+      <div className="flex flex-col w-full lg:w-[82vw] lg:ml-[17vw]">
+        <Topbar onMenuClick={() => setIsMobileMenuOpen(true)} />
+        <div className="bg-primary/5 h-full w-full pt-16 lg:pt-[11vh] overflow-auto">
+          {children}
         </div>
       </div>
     </div>
   );
 }
+

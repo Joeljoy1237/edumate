@@ -129,7 +129,7 @@ export default function AdminProfilePage() {
     if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>
 
     return (
-        <div className="mt-[100px] p-6 bg-gray-50 min-h-screen">
+        <div className="p-4 sm:p-6 p-6 bg-gray-50 min-h-screen">
             <div className="max-w-4xl mx-auto">
                 <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
                     
@@ -308,3 +308,4 @@ export default function AdminProfilePage() {
         </div>
     )
 }
+

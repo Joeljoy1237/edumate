@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "@styles/scss/main.scss";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "../context/AuthContext";
+import EduBot from "@components/EduBot";
 
 export const metadata: Metadata = {
   title: "Edumate",
@@ -21,6 +22,8 @@ export default function RootLayout({
         <AuthProvider>
           {children}
           <Toaster position="bottom-center" reverseOrder={false} />
+          {/* AI Chatbot - Available on all pages */}
+          <EduBot />
         </AuthProvider>
       </body>
     </html>

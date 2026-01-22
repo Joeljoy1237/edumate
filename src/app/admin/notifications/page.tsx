@@ -107,10 +107,10 @@ export default function NotificationsPage() {
       }
   }
 
-  if (loading) return <div className="mt-[100px] flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>
+  if (loading) return <div className="p-4 sm:p-6 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>
 
   return (
-    <div className="mt-[100px] p-6 bg-gray-50 min-h-screen">
+    <div className="p-4 sm:p-6 p-6 bg-gray-50 min-h-screen">
       <div className="max-w-5xl mx-auto">
         
         {/* Header */}
@@ -213,3 +213,4 @@ export default function NotificationsPage() {
     </div>
   )
 }
+

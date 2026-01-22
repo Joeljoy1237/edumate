@@ -209,7 +209,7 @@ export default function page() {
   )
 
   return (
-    <div className="mt-[100px] p-6 bg-gray-50 min-h-screen">
+    <div className="p-4 sm:p-6 p-6 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">

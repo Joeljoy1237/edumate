@@ -160,7 +160,7 @@ export default function CollegePage() {
   if (loading) return <div className="p-10">Loading configuration...</div>
 
   return (
-    <div className="mt-[100px] p-6 bg-gray-50 min-h-screen">
+    <div className="p-4 sm:p-6 p-6 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">College Configuration</h1>
