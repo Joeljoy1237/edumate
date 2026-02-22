@@ -153,7 +153,8 @@ export default function EduBot() {
           });
         }
       } else {
-        console.log("👤 No user logged in (Guest mode)");
+        console.log("👤 No user logged in, Chatbot will be hidden");
+        setCurrentUser(null);
       }
       setIsLoading(false);
     });
@@ -181,15 +182,6 @@ export default function EduBot() {
           timestamp: new Date(),
         };
         setMessages([welcomeMessage]);
-      } else if (!isLoading) {
-        // Guest mode welcome
-        const guestWelcome: Message = {
-          id: "guest-welcome",
-          text: "Hello! 👋 I'm EduBot. Please login to get personalized assistance with your attendance, assignments, results, and more!",
-          sender: "bot",
-          timestamp: new Date(),
-        };
-        setMessages([guestWelcome]);
       }
     }
   }, [currentUser, isLoading, messages.length]);
@@ -824,6 +816,8 @@ export default function EduBot() {
       handleSendMessage();
     }
   };
+
+  if (!currentUser) return null;
 
   return (
     <>

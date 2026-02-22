@@ -17,6 +17,7 @@ import { db } from "../../config/firebaseConfig";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
 
 // Define searchable admin routes for quick access
 const adminSearchRoutes = [
@@ -55,6 +56,21 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
   const searchRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { user } = useAuth();
+  const [avatar, setAvatar] = useState("/assets/profile.png");
+
+  // Fetch real-time profile avatar
+  useEffect(() => {
+    if (user) {
+      const unsub = onSnapshot(doc(db, "admins", user.uid), (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.avatar) setAvatar(data.avatar);
+        }
+      });
+      return () => unsub();
+    }
+  }, [user]);
 
   // Fetch real-time notifications
   useEffect(() => {
@@ -151,8 +167,21 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
         setSearchResults([]);
       }
     };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowNotifications(false);
+        setSearchResults([]);
+        setSearchQuery("");
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   return (
@@ -247,7 +276,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
 
           {/* Wrapper for Dropdown to ensure it sits above other content */}
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200 transform origin-top-right">
               <div className="p-3 sm:p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                 <h3 className="font-semibold text-sm sm:text-base text-gray-800">
                   Notifications
@@ -296,6 +325,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
               <div className="p-3 text-center border-t border-gray-100 bg-gray-50">
                 <a
                   href="/admin/notifications"
+                  onClick={() => setShowNotifications(false)}
                   className="text-xs font-medium text-primary hover:text-blue-700 transition-colors block w-full"
                 >
                   View All Notifications
@@ -306,18 +336,16 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
         </div>
 
         {/* Profile Image */}
-        <a
+        <Link
           href="/admin/profile"
           className="rounded-full p-0.5 sm:p-1 border-2 border-primary cursor-pointer hover:border-blue-500 transition-colors"
         >
-          <Image
-            src={"/assets/profile.png"}
+          <img
+            src={avatar || user?.photoURL || "/assets/profile.png"}
             alt="Profile"
-            width={100}
-            height={100}
             className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-full object-cover"
           />
-        </a>
+        </Link>
       </div>
     </div>
   );

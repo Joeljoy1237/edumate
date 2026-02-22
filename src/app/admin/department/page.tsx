@@ -5,6 +5,7 @@ import { db } from "../../../config/firebaseConfig";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import * as XLSX from "xlsx";
+import Skeleton from "../../../common/components/Skeleton";
 
 export default function DepartmentInternalPage() {
   const [departments, setDepartments] = useState<any[]>([]);
@@ -80,14 +81,67 @@ export default function DepartmentInternalPage() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+        <div className="w-full">
+          {/* Header Skeleton */}
+          <div className="mb-8">
+            <Skeleton className="h-10 w-64 mb-4" />
+            <Skeleton className="h-6 w-96" />
+          </div>
+
+          {/* Quick Actions Skeleton */}
+          <div className="flex space-x-4 mb-6">
+            <Skeleton className="h-10 w-48 rounded-lg" />
+            <Skeleton className="h-10 w-32 rounded-lg" />
+          </div>
+
+          {/* Table Skeleton */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-8">
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+              <div className="flex space-x-4 w-full">
+                {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                  <Skeleton key={i} className="h-4 w-24" />
+                ))}
+              </div>
+            </div>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div
+                key={i}
+                className="p-4 border-b border-gray-100 flex justify-between items-center"
+              >
+                <Skeleton className="h-6 w-32" />
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-16" />
+                <Skeleton className="h-6 w-16 rounded-full" />
+                <div className="flex space-x-2">
+                  <Skeleton className="h-6 w-12" />
+                  <Skeleton className="h-6 w-12" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-gray-300"
+              >
+                <Skeleton className="h-4 w-32 mb-2" />
+                <Skeleton className="h-8 w-16" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
@@ -115,7 +169,7 @@ export default function DepartmentInternalPage() {
         </div>
 
         {/* Departments Table */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           {departments.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
               No departments found. Create one to get started.
@@ -201,7 +255,7 @@ export default function DepartmentInternalPage() {
 
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
               Total Departments
             </h3>
@@ -209,7 +263,7 @@ export default function DepartmentInternalPage() {
               {departments.length}
             </p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
               Active Departments
             </h3>
@@ -217,7 +271,7 @@ export default function DepartmentInternalPage() {
               {departments.filter((d) => d.status === "active").length}
             </p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
               Total Faculty
             </h3>
@@ -225,7 +279,7 @@ export default function DepartmentInternalPage() {
               {totalFaculty}
             </p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
               Total Students
             </h3>
@@ -238,4 +292,3 @@ export default function DepartmentInternalPage() {
     </div>
   );
 }
-

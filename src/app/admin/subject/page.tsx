@@ -1,178 +1,300 @@
-"use client"
-import React, { useState, useEffect } from 'react'
-import { collection, onSnapshot, deleteDoc, doc } from 'firebase/firestore'
-import { db } from '../../../config/firebaseConfig'
-import Link from 'next/link'
-import toast from 'react-hot-toast'
-import * as XLSX from 'xlsx'
+"use client";
+import React, { useState, useEffect } from "react";
+import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
+import { db } from "../../../config/firebaseConfig";
+import Link from "next/link";
+import toast from "react-hot-toast";
+import * as XLSX from "xlsx";
+import Skeleton from "../../../common/components/Skeleton";
 
 export default function SubjectPage() {
-  const [subjects, setSubjects] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "subjects"), (snapshot) => {
-        const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-        setSubjects(list)
-        setLoading(false)
-    }, (error) => {
-        console.error(error)
-        toast.error("Failed to load subjects")
-        setLoading(false)
-    })
-    return () => unsub()
-  }, [])
+    const unsub = onSnapshot(
+      collection(db, "subjects"),
+      (snapshot) => {
+        const list = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setSubjects(list);
+        setLoading(false);
+      },
+      (error) => {
+        console.error(error);
+        toast.error("Failed to load subjects");
+        setLoading(false);
+      },
+    );
+    return () => unsub();
+  }, []);
 
   const handleDelete = async (id: string) => {
-    if(!confirm("Are you sure you want to delete this subject?")) return;
+    if (!confirm("Are you sure you want to delete this subject?")) return;
     try {
-        await deleteDoc(doc(db, "subjects", id))
-        toast.success("Subject deleted")
+      await deleteDoc(doc(db, "subjects", id));
+      toast.success("Subject deleted");
     } catch (error) {
-        toast.error("Failed to delete")
+      toast.error("Failed to delete");
     }
-  }
-  
+  };
+
   const handleExport = () => {
     if (subjects.length === 0) {
-        toast.error("No data to export");
-        return;
+      toast.error("No data to export");
+      return;
     }
     const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(subjects.map(s => ({
+    const ws = XLSX.utils.json_to_sheet(
+      subjects.map((s) => ({
         Name: s.name,
         Code: s.code,
         Department: s.department,
         Semester: s.semester,
         Credits: s.credits,
         Type: s.type,
-        Status: s.status
-    })));
+        Status: s.status,
+      })),
+    );
     XLSX.utils.book_append_sheet(wb, ws, "Subjects");
     XLSX.writeFile(wb, "subjects_data.xlsx");
     toast.success("Export successful!");
-  }
+  };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'Core': return 'bg-blue-100 text-blue-800';
-      case 'Elective': return 'bg-green-100 text-green-800';
-      case 'Lab': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "Core":
+        return "bg-blue-100 text-blue-800";
+      case "Elective":
+        return "bg-green-100 text-green-800";
+      case "Lab":
+        return "bg-purple-100 text-purple-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
-    return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-  }
+    return status === "active"
+      ? "bg-green-100 text-green-800"
+      : "bg-red-100 text-red-800";
+  };
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-    </div>
-  )
+  if (loading)
+    return (
+      <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+        <div className="w-full">
+          {/* Header Skeleton */}
+          <div className="mb-8">
+            <Skeleton className="h-10 w-64 mb-4" />
+            <Skeleton className="h-6 w-96" />
+          </div>
+
+          {/* Quick Actions Skeleton */}
+          <div className="flex space-x-4 mb-6">
+            <Skeleton className="h-10 w-48 rounded-lg" />
+            <Skeleton className="h-10 w-32 rounded-lg" />
+          </div>
+
+          {/* Table Skeleton */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-8">
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+              <div className="flex space-x-6 w-full">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Skeleton key={i} className="h-4 w-24" />
+                ))}
+              </div>
+            </div>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="p-4 border-b border-gray-100 flex justify-between items-center"
+              >
+                <div className="space-y-1">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+                <div className="space-y-1">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-4 w-12" />
+                </div>
+                <Skeleton className="h-6 w-12" />
+                <Skeleton className="h-6 w-16 rounded-full" />
+                <Skeleton className="h-6 w-16 rounded-full" />
+                <div className="flex space-x-2">
+                  <Skeleton className="h-6 w-12" />
+                  <Skeleton className="h-6 w-12" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-gray-300"
+              >
+                <Skeleton className="h-4 w-32 mb-2" />
+                <Skeleton className="h-8 w-16" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
 
   return (
-    <div className="p-4 sm:p-6 p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+      <div className="w-full">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Manage Subjects</h1>
-          <p className="text-gray-600 mt-2">Curriculum and subjects offered within the institution.</p>
+          <p className="text-gray-600 mt-2">
+            Curriculum and subjects offered within the institution.
+          </p>
         </div>
 
         {/* Quick Actions */}
         <div className="flex space-x-4 mb-6">
-            <Link href="/admin/subject/add">
-                <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                    Add New Subject
-                </button>
-            </Link>
-            <button 
-                onClick={handleExport}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-            >
-                Export Data
+          <Link href="/admin/subject/add">
+            <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+              Add New Subject
             </button>
+          </Link>
+          <button
+            onClick={handleExport}
+            className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+          >
+            Export Data
+          </button>
         </div>
 
         {/* Subjects Table */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-         {subjects.length === 0 ? (
-             <div className="p-8 text-center text-gray-500">
-                No subjects found. Add one to get started.
-             </div>
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          {subjects.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              No subjects found. Add one to get started.
+            </div>
           ) : (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name & Code</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department / Semester</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Credits</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {subjects.map((subject) => (
-                <tr key={subject.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{subject.name}</div>
-                    <div className="text-sm text-gray-500">{subject.code}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{subject.department}</div>
-                    <div className="text-sm text-gray-500">{subject.semester}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{subject.credits}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(subject.type || 'Core')}`}>
-                      {subject.type || 'Core'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(subject.status || 'active')}`}>
-                      {(subject.status || 'active').toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <Link href={`/admin/subject/edit/${subject.id}`}>
-                        <button className="text-blue-600 hover:text-blue-900">Edit</button>
-                    </Link>
-                    <button onClick={() => handleDelete(subject.id)} className="text-red-600 hover:text-red-900">Delete</button>
-                  </td>
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Name & Code
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Department / Semester
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Credits
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {subjects.map((subject) => (
+                  <tr key={subject.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {subject.name}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {subject.code}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {subject.department}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {subject.semester}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {subject.credits}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(subject.type || "Core")}`}
+                      >
+                        {subject.type || "Core"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(subject.status || "active")}`}
+                      >
+                        {(subject.status || "active").toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      <Link href={`/admin/subject/edit/${subject.id}`}>
+                        <button className="text-blue-600 hover:text-blue-900">
+                          Edit
+                        </button>
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(subject.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
 
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Subjects</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-1">{subjects.length}</p>
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Total Subjects
+            </h3>
+            <p className="text-3xl font-bold text-gray-900 mt-1">
+              {subjects.length}
+            </p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Active Subjects</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-1">{subjects.filter(s => s.status === 'active').length}</p>
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Active Subjects
+            </h3>
+            <p className="text-3xl font-bold text-gray-900 mt-1">
+              {subjects.filter((s) => s.status === "active").length}
+            </p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Credits</h3>
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Total Credits
+            </h3>
             <p className="text-3xl font-bold text-gray-900 mt-1">
               {subjects.reduce((sum, s) => sum + (Number(s.credits) || 0), 0)}
             </p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Core Subjects</h3>
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Core Subjects
+            </h3>
             <p className="text-3xl font-bold text-gray-900 mt-1">
-              {subjects.filter(s => s.type === 'Core').length}
+              {subjects.filter((s) => s.type === "Core").length}
             </p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

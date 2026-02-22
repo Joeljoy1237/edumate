@@ -1,213 +1,361 @@
-"use client"
-import React, { useState, useEffect } from 'react'
-import { collection, onSnapshot, deleteDoc, doc, getDocs } from 'firebase/firestore'
-import { db } from '../../../config/firebaseConfig'
-import Link from 'next/link'
-import toast from 'react-hot-toast'
-import * as XLSX from 'xlsx'
+"use client";
+import React, { useState, useEffect } from "react";
+import {
+  collection,
+  onSnapshot,
+  deleteDoc,
+  doc,
+  getDocs,
+} from "firebase/firestore";
+import { db } from "../../../config/firebaseConfig";
+import Link from "next/link";
+import toast from "react-hot-toast";
+import * as XLSX from "xlsx";
+import Skeleton from "../../../common/components/Skeleton";
 
 export default function FacultyPage() {
-  const [faculties, setFaculties] = useState<any[]>([])
-  const [departments, setDepartments] = useState<any[]>([])
-  const [selectedDept, setSelectedDept] = useState<string>('')
-  const [loading, setLoading] = useState(true)
+  const [faculties, setFaculties] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
+  const [selectedDept, setSelectedDept] = useState<string>("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Fetch Departments for Filter
     const fetchDepartments = async () => {
-        try {
-            const deptSnapshot = await getDocs(collection(db, "departments"));
-            const deptList = deptSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            // Sort departments alphabetically
-            deptList.sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
-            setDepartments(deptList);
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to load departments");
-        }
+      try {
+        const deptSnapshot = await getDocs(collection(db, "departments"));
+        const deptList = deptSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        // Sort departments alphabetically
+        deptList.sort((a: any, b: any) =>
+          (a.name || "").localeCompare(b.name || ""),
+        );
+        setDepartments(deptList);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to load departments");
+      }
     };
     fetchDepartments();
 
-    const unsub = onSnapshot(collection(db, "faculty"), (snapshot) => {
-        const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-        setFaculties(list)
-        setLoading(false)
-    }, (error) => {
-        console.error(error)
-        toast.error("Failed to load faculty")
-        setLoading(false)
-    })
-    return () => unsub()
-  }, [])
+    const unsub = onSnapshot(
+      collection(db, "faculty"),
+      (snapshot) => {
+        const list = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setFaculties(list);
+        setLoading(false);
+      },
+      (error) => {
+        console.error(error);
+        toast.error("Failed to load faculty");
+        setLoading(false);
+      },
+    );
+    return () => unsub();
+  }, []);
 
   const handleDelete = async (id: string) => {
-    if(!confirm("Are you sure you want to delete this faculty member?")) return;
+    if (!confirm("Are you sure you want to delete this faculty member?"))
+      return;
     try {
-        await deleteDoc(doc(db, "faculty", id))
-        toast.success("Faculty deleted")
+      await deleteDoc(doc(db, "faculty", id));
+      toast.success("Faculty deleted");
     } catch (error) {
-        toast.error("Failed to delete")
+      toast.error("Failed to delete");
     }
-  }
+  };
 
   const handleExport = () => {
-     if (faculties.length === 0) {
-         toast.error("No data to export");
-         return;
-     }
-     const wb = XLSX.utils.book_new();
-     const ws = XLSX.utils.json_to_sheet(faculties.map(f => ({
-         UID: f.uid,
-         Name: f.name,
-         Email: f.email,
-         Phone: f.phone,
-         Department: f.department,
-         Designation: f.designation,
-         Role: f.role,
-         Status: f.accessStatus
-     })));
-     XLSX.utils.book_append_sheet(wb, ws, "Faculty");
-     XLSX.writeFile(wb, "faculty_data.xlsx");
-     toast.success("Export successful!");
-   }
+    if (faculties.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(
+      faculties.map((f) => ({
+        UID: f.uid,
+        Name: f.name,
+        Email: f.email,
+        Phone: f.phone,
+        Department: f.department,
+        Designation: f.designation,
+        Role: f.role,
+        Status: f.accessStatus,
+      })),
+    );
+    XLSX.utils.book_append_sheet(wb, ws, "Faculty");
+    XLSX.writeFile(wb, "faculty_data.xlsx");
+    toast.success("Export successful!");
+  };
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'Faculty': return 'bg-blue-100 text-blue-800';
-      case 'Tutor': return 'bg-green-100 text-green-800';
-      case 'Coordinator': return 'bg-purple-100 text-purple-800';
-      case 'HOD': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "Faculty":
+        return "bg-blue-100 text-blue-800";
+      case "Tutor":
+        return "bg-green-100 text-green-800";
+      case "Coordinator":
+        return "bg-purple-100 text-purple-800";
+      case "HOD":
+        return "bg-orange-100 text-orange-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
-    return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-  }
+    return status === "active"
+      ? "bg-green-100 text-green-800"
+      : "bg-red-100 text-red-800";
+  };
 
-  const filteredFaculties = selectedDept 
-    ? faculties.filter(f => f.department === selectedDept)
-    : faculties
+  const filteredFaculties = selectedDept
+    ? faculties.filter((f) => f.department === selectedDept)
+    : faculties;
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-    </div>
-  )
+  if (loading)
+    return (
+      <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+        <div className="w-full">
+          {/* Header Skeleton */}
+          <div className="mb-8">
+            <Skeleton className="h-10 w-64 mb-4" />
+            <Skeleton className="h-6 w-96" />
+          </div>
+
+          {/* Quick Actions Skeleton */}
+          <div className="flex flex-wrap items-center gap-4 mb-6">
+            <Skeleton className="h-10 w-40 rounded-lg" />
+            <Skeleton className="h-10 w-32 rounded-lg" />
+            <Skeleton className="h-10 w-56 rounded-lg" />
+          </div>
+
+          {/* Table Skeleton */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-8">
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+              <div className="flex space-x-6 w-full">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Skeleton key={i} className="h-4 w-24" />
+                ))}
+              </div>
+            </div>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="p-4 border-b border-gray-100 flex justify-between items-center"
+              >
+                <div className="space-y-1">
+                  <Skeleton className="h-5 w-16" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-40" />
+                </div>
+                <div className="space-y-1">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-6 w-16 rounded-full" />
+                <Skeleton className="h-6 w-16 rounded-full" />
+                <div className="flex space-x-2">
+                  <Skeleton className="h-6 w-12" />
+                  <Skeleton className="h-6 w-12" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-gray-300"
+              >
+                <Skeleton className="h-4 w-32 mb-2" />
+                <Skeleton className="h-8 w-16" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
 
   return (
-    <div className="p-4 sm:p-6 p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
+      <div className="w-full">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Manage Faculty</h1>
-          <p className="text-gray-600 mt-2">Accounts and academic responsibilities for faculty members.</p>
+          <p className="text-gray-600 mt-2">
+            Accounts and academic responsibilities for faculty members.
+          </p>
         </div>
 
         {/* Quick Actions */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
-            <Link href="/admin/faculty/add">
-                <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                    Add New Faculty
-                </button>
-            </Link>
-            <button 
-                onClick={handleExport}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-            >
-                Export Data
+          <Link href="/admin/faculty/add">
+            <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+              Add New Faculty
             </button>
-             {/* Department Filter Dropdown */}
-            <select 
-                value={selectedDept}
-                onChange={(e) => setSelectedDept(e.target.value)}
-                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer min-w-[200px]"
-            >
-                <option value="">All Departments</option>
-                {departments.map((dept: any) => (
-                    <option key={dept.id} value={dept.name}>{dept.name}</option>
-                ))}
-            </select>
+          </Link>
+          <button
+            onClick={handleExport}
+            className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+          >
+            Export Data
+          </button>
+          {/* Department Filter Dropdown */}
+          <select
+            value={selectedDept}
+            onChange={(e) => setSelectedDept(e.target.value)}
+            className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer min-w-[200px]"
+          >
+            <option value="">All Departments</option>
+            {departments.map((dept: any) => (
+              <option key={dept.id} value={dept.name}>
+                {dept.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Faculty Table */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-         {filteredFaculties.length === 0 ? (
-             <div className="p-8 text-center text-gray-500">
-                No faculty found matching filters.
-             </div>
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          {filteredFaculties.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              No faculty found matching filters.
+            </div>
           ) : (
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID & Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department / Designation</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Access Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredFaculties.map((faculty) => (
-                <tr key={faculty.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{faculty.uid}</div>
-                    <div className="text-sm text-gray-500">{faculty.name}</div>
-                    <div className="text-xs text-gray-400">{faculty.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{faculty.department}</div>
-                    <div className="text-sm text-gray-500">{faculty.designation}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{faculty.phone}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(faculty.accessStatus || 'active')}`}>
-                      {(faculty.accessStatus || 'active').charAt(0).toUpperCase() + (faculty.accessStatus || 'active').slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(faculty.role || 'Faculty')}`}>
-                      {faculty.role || 'Faculty'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <Link href={`/admin/faculty/edit/${faculty.id}`}>
-                        <button className="text-blue-600 hover:text-blue-900">Edit</button>
-                    </Link>
-                    <button onClick={() => handleDelete(faculty.id)} className="text-red-600 hover:text-red-900">Delete</button>
-                  </td>
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    ID & Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Department / Designation
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Contact
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Access Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Role
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredFaculties.map((faculty) => (
+                  <tr key={faculty.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {faculty.uid}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {faculty.name}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {faculty.email}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {faculty.department}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {faculty.designation}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {faculty.phone}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(faculty.accessStatus || "active")}`}
+                      >
+                        {(faculty.accessStatus || "active")
+                          .charAt(0)
+                          .toUpperCase() +
+                          (faculty.accessStatus || "active").slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(faculty.role || "Faculty")}`}
+                      >
+                        {faculty.role || "Faculty"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      <Link href={`/admin/faculty/edit/${faculty.id}`}>
+                        <button className="text-blue-600 hover:text-blue-900">
+                          Edit
+                        </button>
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(faculty.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
 
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Faculty</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-1">{filteredFaculties.length}</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Active Faculty</h3>
-            <p className="text-3xl font-bold text-gray-900 mt-1">{filteredFaculties.filter(f => f.accessStatus === 'active').length}</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Faculty Roles</h3>
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Total Faculty
+            </h3>
             <p className="text-3xl font-bold text-gray-900 mt-1">
-              {filteredFaculties.filter(f => f.role === 'Faculty').length} Faculty
+              {filteredFaculties.length}
             </p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Departments Covered</h3>
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Active Faculty
+            </h3>
             <p className="text-3xl font-bold text-gray-900 mt-1">
-              {new Set(filteredFaculties.map(f => f.department)).size}
+              {
+                filteredFaculties.filter((f) => f.accessStatus === "active")
+                  .length
+              }
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Faculty Roles
+            </h3>
+            <p className="text-3xl font-bold text-gray-900 mt-1">
+              {filteredFaculties.filter((f) => f.role === "Faculty").length}{" "}
+              Faculty
+            </p>
+          </div>
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
+            <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+              Departments Covered
+            </h3>
+            <p className="text-3xl font-bold text-gray-900 mt-1">
+              {new Set(filteredFaculties.map((f) => f.department)).size}
             </p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

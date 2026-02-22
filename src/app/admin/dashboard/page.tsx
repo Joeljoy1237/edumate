@@ -94,7 +94,7 @@ export default function page() {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="bg-white p-6 rounded-lg shadow-md border-l-4 border-gray-200 h-32"
+            className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 h-32"
           >
             <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
             <div className="h-10 bg-gray-200 rounded w-1/4"></div>
@@ -104,7 +104,7 @@ export default function page() {
 
       {/* Middle Row Skeleton */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-md h-64">
+        <div className="bg-white p-6 rounded-lg border border-gray-200 h-64">
           <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
           <div className="flex justify-between items-center mt-10">
             <div className="h-16 w-16 bg-gray-200 rounded-full"></div>
@@ -114,7 +114,7 @@ export default function page() {
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md h-64">
+        <div className="bg-white p-6 rounded-lg border border-gray-200 h-64">
           <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
@@ -127,7 +127,10 @@ export default function page() {
       {/* Bottom Row Skeleton */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {[1, 2].map((c) => (
-          <div key={c} className="bg-white p-6 rounded-lg shadow-md h-64">
+          <div
+            key={c}
+            className="bg-white p-6 rounded-lg border border-gray-200 h-64"
+          >
             <div className="h-6 bg-gray-200 rounded w-1/3 mb-6"></div>
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
@@ -149,7 +152,7 @@ export default function page() {
   if (loading) {
     return (
       <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
           <SkeletonLoader />
         </div>
       </div>
@@ -158,7 +161,7 @@ export default function page() {
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
@@ -169,7 +172,7 @@ export default function page() {
 
         {/* Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
               Total Students
             </h3>
@@ -177,7 +180,7 @@ export default function page() {
               {stats.students.toLocaleString()}
             </p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
               Total Faculty
             </h3>
@@ -185,7 +188,7 @@ export default function page() {
               {stats.faculty.toLocaleString()}
             </p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
             <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
               Departments
             </h3>
@@ -197,7 +200,7 @@ export default function page() {
 
         {/* Attendance Summary */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-6 rounded-lg border border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Attendance Summary
             </h3>
@@ -220,7 +223,7 @@ export default function page() {
           </div>
 
           {/* Upcoming Exams and Assignments */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-6 rounded-lg border border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Upcoming Exams & Assignments
             </h3>
@@ -245,7 +248,7 @@ export default function page() {
 
         {/* Notifications and Activity Logs */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-6 rounded-lg border border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Recent Notifications & Alerts
             </h3>
@@ -264,7 +267,7 @@ export default function page() {
             </ul>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="bg-white p-6 rounded-lg border border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Recent Student Additions
             </h3>
@@ -291,7 +294,7 @@ export default function page() {
         </div>
 
         {/* Quick-Access Shortcuts */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="bg-white p-6 rounded-lg border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Quick-Access Shortcuts
           </h3>
@@ -314,4 +317,3 @@ export default function page() {
     </div>
   );
 }
-
