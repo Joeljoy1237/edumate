@@ -184,7 +184,7 @@ export default function MyProfile() {
   if (loading) return <div className="mt-[100px] flex justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div></div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col mt-[80px] p-6 mb-[50px]">
+    <div className="min-h-screen bg-gray-50 flex flex-col p-6">
       <div className=" w-full">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {/* Header */}

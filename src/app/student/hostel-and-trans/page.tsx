@@ -135,16 +135,17 @@ export default function HostelTransportPage() {
       }
   }
 
-  if (loading) {
+    if (loading) {
       return (
-        <div className="flex justify-center items-center min-h-screen mt-[80px]">
-             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
+          <div className="p-6 bg-gray-50 min-h-screen animate-pulse">
+              <div className="h-8 w-48 bg-gray-200 rounded mb-6"></div>
+              <div className="h-64 bg-white rounded-lg border border-gray-100 w-full"></div>
+          </div>
       );
   }
 
   return (
-    <div className="p-4 md:p-6 bg-gray-50 min-h-screen mt-[80px] mb-[60px]">
+    <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="mb-6 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Hostel & Transport</h1>
@@ -158,8 +159,8 @@ export default function HostelTransportPage() {
       {services ? (
           <>
             {/* Tabs */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 overflow-hidden">
-                <div className="border-b border-gray-200">
+            <div className="bg-white rounded-lg border border-gray-100 mb-6 overflow-hidden">
+                <div className="border-b border-gray-100">
                 <nav className="flex px-6 gap-6">
                     <button
                         onClick={() => setActiveTab('hostel')}
@@ -222,7 +223,7 @@ export default function HostelTransportPage() {
                             </div>
 
                             {/* Fee Status */}
-                            <div className="lg:col-span-1 bg-white rounded-xl p-6 border border-gray-200 shadow-sm flex flex-col justify-between">
+                            <div className="lg:col-span-1 bg-white rounded-xl p-6 border border-gray-100 flex flex-col justify-between">
                                 <div>
                                     <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                         Fee Status
@@ -290,7 +291,7 @@ export default function HostelTransportPage() {
                             </div>
 
                              {/* Fee Status */}
-                             <div className="lg:col-span-1 bg-white rounded-xl p-6 border border-gray-200 shadow-sm flex flex-col justify-between">
+                             <div className="lg:col-span-1 bg-white rounded-xl p-6 border border-gray-100 flex flex-col justify-between">
                                 <div>
                                     <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                         Fee Status
@@ -326,8 +327,8 @@ export default function HostelTransportPage() {
             </div>
           </>
       ) : (
-          <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="text-center py-12 bg-white rounded-lg border border-gray-100">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center  mb-4">
                   <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
               </div>
               <h3 className="text-lg font-medium text-gray-900">No Services Found</h3>

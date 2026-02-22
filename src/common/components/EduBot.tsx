@@ -48,6 +48,8 @@ export default function EduBot() {
   // Fetch current user data
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      const isCurrent = () => auth.currentUser?.uid === user?.uid;
+
       if (user) {
         console.log("🔐 User logged in:", user.email);
         try {
@@ -58,26 +60,7 @@ export default function EduBot() {
           if (userDocSnap.exists()) {
             const userData = userDocSnap.data();
             console.log("✅ User data found by UID:", userData);
-            setCurrentUser({
-              name: userData.name || user.displayName || "User",
-              email: user.email || "",
-              role: userData.role || "student",
-              uid: user.uid,
-              regNumber: userData.regNumber,
-              department: userData.department,
-              batch: userData.batch,
-              semester: userData.semester,
-            });
-          } else {
-            // Fallback: Check by email in users collection
-            console.log("⚠️ User doc not found by UID, trying email query...");
-            const usersRef = collection(db, "users");
-            const qUsers = query(usersRef, where("email", "==", user.email));
-            const userSnap = await getDocs(qUsers);
-
-            if (!userSnap.empty) {
-              const userData = userSnap.docs[0].data();
-              console.log("✅ User data found by email:", userData);
+            if (isCurrent()) {
               setCurrentUser({
                 name: userData.name || user.displayName || "User",
                 email: user.email || "",
@@ -88,6 +71,29 @@ export default function EduBot() {
                 batch: userData.batch,
                 semester: userData.semester,
               });
+            }
+          } else {
+            // Fallback: Check by email in users collection
+            console.log("⚠️ User doc not found by UID, trying email query...");
+            const usersRef = collection(db, "users");
+            const qUsers = query(usersRef, where("email", "==", user.email));
+            const userSnap = await getDocs(qUsers);
+
+            if (!userSnap.empty) {
+              const userData = userSnap.docs[0].data();
+              console.log("✅ User data found by email:", userData);
+              if (isCurrent()) {
+                setCurrentUser({
+                  name: userData.name || user.displayName || "User",
+                  email: user.email || "",
+                  role: userData.role || "student",
+                  uid: user.uid,
+                  regNumber: userData.regNumber,
+                  department: userData.department,
+                  batch: userData.batch,
+                  semester: userData.semester,
+                });
+              }
             } else {
               // Check in admins collection
               console.log("⚠️ Not in users collection, checking admins...");
@@ -101,12 +107,14 @@ export default function EduBot() {
               if (!adminSnap.empty) {
                 const adminData = adminSnap.docs[0].data();
                 console.log("✅ Admin data found:", adminData);
-                setCurrentUser({
-                  name: adminData.name || user.displayName || "Admin",
-                  email: user.email || "",
-                  role: "admin",
-                  uid: user.uid,
-                });
+                if (isCurrent()) {
+                  setCurrentUser({
+                    name: adminData.name || user.displayName || "Admin",
+                    email: user.email || "",
+                    role: "admin",
+                    uid: user.uid,
+                  });
+                }
               } else {
                 // Check in parents collection
                 console.log("⚠️ Not in admins, checking parents...");
@@ -120,24 +128,28 @@ export default function EduBot() {
                 if (!parentSnap.empty) {
                   const parentData = parentSnap.docs[0].data();
                   console.log("✅ Parent data found:", parentData);
-                  setCurrentUser({
-                    name: parentData.name || user.displayName || "Parent",
-                    email: user.email || "",
-                    role: "parent",
-                    uid: user.uid,
-                  });
+                  if (isCurrent()) {
+                    setCurrentUser({
+                      name: parentData.name || user.displayName || "Parent",
+                      email: user.email || "",
+                      role: "parent",
+                      uid: user.uid,
+                    });
+                  }
                 } else {
                   // Fallback: Use Firebase Auth data
                   console.log(
                     "⚠️ No Firestore data found, using Auth data as fallback",
                   );
-                  setCurrentUser({
-                    name:
-                      user.displayName || user.email?.split("@")[0] || "User",
-                    email: user.email || "",
-                    role: "student",
-                    uid: user.uid,
-                  });
+                  if (isCurrent()) {
+                    setCurrentUser({
+                      name:
+                        user.displayName || user.email?.split("@")[0] || "User",
+                      email: user.email || "",
+                      role: "student",
+                      uid: user.uid,
+                    });
+                  }
                 }
               }
             }
@@ -145,12 +157,14 @@ export default function EduBot() {
         } catch (error) {
           console.error("❌ Error fetching user data:", error);
           // Fallback to basic auth data
-          setCurrentUser({
-            name: user.displayName || user.email?.split("@")[0] || "User",
-            email: user.email || "",
-            role: "student",
-            uid: user.uid,
-          });
+          if (isCurrent()) {
+            setCurrentUser({
+              name: user.displayName || user.email?.split("@")[0] || "User",
+              email: user.email || "",
+              role: "student",
+              uid: user.uid,
+            });
+          }
         }
       } else {
         console.log("👤 No user logged in, Chatbot will be hidden");

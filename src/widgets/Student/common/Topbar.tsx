@@ -18,6 +18,7 @@ import { IoTimeOutline, IoClose } from "react-icons/io5";
 export default function Topbar() {
   const { user } = useAuth();
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -29,12 +30,16 @@ export default function Topbar() {
 
     // Set initial from Auth
     setProfilePhoto(user.photoURL);
+    setUserName(user.displayName);
 
     const unsub = onSnapshot(doc(db, "students", user.uid), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         if (data.info?.photoUrl) {
           setProfilePhoto(data.info.photoUrl);
+        }
+        if (data.name) {
+          setUserName(data.name);
         }
       }
     });
@@ -111,9 +116,15 @@ export default function Topbar() {
   return (
     <div className="h-[11vh] fixed bg-white w-[82vw] flex flex-row items-center justify-between px-[2vw] shadow-sm z-50">
       <div className="">
-        <span className="font-semibold text-xl text-primary">
+        <span className="font-semibold text-xl text-primary capitalize">
           Welcome,{" "}
-          {user?.displayName || user?.email?.split("@")[0] || "Student"} 👋
+          {(
+            userName ||
+            user?.displayName ||
+            user?.email?.split("@")[0] ||
+            "Student"
+          ).toLowerCase()}{" "}
+          👋
         </span>
       </div>
 

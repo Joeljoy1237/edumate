@@ -206,16 +206,26 @@ export default function PerformancePage() {
     ],
   };
 
-  if (loading) {
+    if (loading) {
       return (
-        <div className="flex justify-center items-center min-h-screen mt-[80px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="p-6 bg-gray-50 min-h-screen animate-pulse">
+            <div className="h-8 w-48 bg-gray-200 rounded mb-2"></div>
+            <div className="h-4 w-96 bg-gray-200 rounded mb-6"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="h-32 bg-white rounded-lg border border-gray-100"></div>
+                <div className="h-32 bg-white rounded-lg border border-gray-100"></div>
+                <div className="h-32 bg-white rounded-lg border border-gray-100"></div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+                <div className="h-80 bg-white rounded-lg border border-gray-100"></div>
+                <div className="h-80 bg-white rounded-lg border border-gray-100"></div>
+            </div>
         </div>
       );
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen mt-[80px] mb-[60px]">
+    <div className="p-6 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="mb-6 flex justify-between items-center">
         <div>
@@ -231,16 +241,16 @@ export default function PerformancePage() {
 
       {/* Current Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-6 rounded-lg border border-gray-100">
           <h3 className="text-sm font-medium text-gray-500 mb-1">Current GPA</h3>
           <p className="text-3xl font-bold text-gray-900 mb-1">{gpa.toFixed(2)}</p>
           <p className="text-sm text-green-600">Cumulative</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-6 rounded-lg border border-gray-100">
           <h3 className="text-sm font-medium text-gray-500 mb-1">Total Credits Earned</h3>
           <p className="text-3xl font-bold text-gray-900">{totalCredits}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-6 rounded-lg border border-gray-100">
           <h3 className="text-sm font-medium text-gray-500 mb-1">Class Rank (Est.)</h3>
           <p className="text-3xl font-bold text-gray-900">{rank > 0 ? `#${rank}` : '-'}</p>
           <p className="text-sm text-gray-600">Based on GPA</p>
@@ -251,14 +261,14 @@ export default function PerformancePage() {
           <>
             {/* Charts Row */}
             <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div className="bg-white p-6 rounded-lg border border-gray-100">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Trend</h3>
                     <p className="text-sm text-gray-600 mb-4">Your GPA over semesters</p>
                     <div className="h-64">
                         <Line data={trendData} options={{ responsive: true, maintainAspectRatio: false }} />
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div className="bg-white p-6 rounded-lg border border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Subject Performance</h3>
                 <p className="text-sm text-gray-600 mb-4">Average scores across all exams</p>
                 <div className="h-64">
@@ -276,7 +286,7 @@ export default function PerformancePage() {
             </div>
 
             {/* Radar Chart */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div className="bg-white p-6 rounded-lg border border-gray-100 mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Subject Balance</h3>
                 <p className="text-sm text-gray-600 mb-4">Comparison of your latest scores against class average</p>
                 <div className="h-80">
@@ -292,8 +302,8 @@ export default function PerformancePage() {
             </div>
 
             {/* Recent Grades Table */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div className="p-6 border-b border-gray-200">
+            <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+                <div className="p-6 border-b border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-900">Recent Grades</h3>
                 <p className="text-sm text-gray-600 mt-1">Your latest exam results</p>
                 </div>
@@ -330,7 +340,7 @@ export default function PerformancePage() {
             </div>
           </>
       ) : (
-          <div className="bg-white p-12 text-center rounded-lg border border-gray-200">
+          <div className="bg-white p-12 text-center rounded-lg border border-gray-100">
                <p className="text-gray-500">No performance data available yet.</p>
           </div>
       )}

@@ -6,7 +6,8 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { auth } from "../../../config/firebaseConfig";
+import { auth, db } from "../../../config/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "../../../context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -23,9 +24,20 @@ export default function AdminLogin() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!authLoading && user) {
-      router.replace("/admin/dashboard");
-    }
+    const checkExistingSession = async () => {
+      if (!authLoading && user) {
+        try {
+          const adminDocRef = doc(db, "admins", user.uid);
+          const adminDocSnap = await getDoc(adminDocRef);
+          if (adminDocSnap.exists()) {
+            router.replace("/admin/dashboard");
+          }
+        } catch (e) {
+          console.error("Session verification error:", e);
+        }
+      }
+    };
+    checkExistingSession();
   }, [user, authLoading, router]);
 
   const getErrorMessage = (errorCode: string) => {
@@ -60,6 +72,16 @@ export default function AdminLogin() {
         email,
         password,
       );
+
+      // Verify if the logged in user is actually an admin
+      const adminDocRef = doc(db, "admins", userCredential.user.uid);
+      const adminDocSnap = await getDoc(adminDocRef);
+
+      if (!adminDocSnap.exists()) {
+        await auth.signOut();
+        throw { code: "auth/user-not-found" };
+      }
+
       console.log("✅ Logged in:", userCredential.user);
 
       toast.success("Welcome back! Redirecting...", { id: toastId });

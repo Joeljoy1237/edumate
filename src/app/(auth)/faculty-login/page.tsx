@@ -6,7 +6,8 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { auth } from "../../../config/firebaseConfig";
+import { auth, db } from "../../../config/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "../../../context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -23,10 +24,20 @@ export default function FacultyLogin() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!authLoading && user) {
-      // Redirect to Faculty dashboard (adjust path if needed)
-      router.replace("/faculty/dashboard");
-    }
+    const checkExistingSession = async () => {
+      if (!authLoading && user) {
+        try {
+          const facultyDocRef = doc(db, "faculty", user.uid);
+          const facultyDocSnap = await getDoc(facultyDocRef);
+          if (facultyDocSnap.exists()) {
+            router.replace("/faculty/dashboard");
+          }
+        } catch (e) {
+          console.error("Session verification error:", e);
+        }
+      }
+    };
+    checkExistingSession();
   }, [user, authLoading, router]);
 
   const getErrorMessage = (errorCode: string) => {
@@ -61,6 +72,16 @@ export default function FacultyLogin() {
         email,
         password,
       );
+
+      // Verify if the logged-in user is actually a faculty member
+      const facultyDocRef = doc(db, "faculty", userCredential.user.uid);
+      const facultyDocSnap = await getDoc(facultyDocRef);
+
+      if (!facultyDocSnap.exists()) {
+        await auth.signOut();
+        throw { code: "auth/user-not-found" };
+      }
+
       console.log("✅ Logged in:", userCredential.user);
 
       toast.success("Welcome back! Redirecting...", { id: toastId });

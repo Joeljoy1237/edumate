@@ -98,14 +98,14 @@ export default function ParentDashboard() {
 
   if (loading) {
       return (
-        <div className="flex items-center justify-center min-h-screen mt-[80px]">
+        <div className="flex items-center justify-center min-h-screen">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
       );
   }
 
   return (
-    <div className="w-full p-4 md:p-6 mb-[50px] mt-[80px] bg-gray-50 min-h-screen">
+    <div className="w-full p-4 md:p-6 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">

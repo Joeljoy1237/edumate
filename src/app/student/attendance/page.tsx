@@ -87,16 +87,18 @@ export default function AttendancePage() {
       }
   };
 
-  if (loading) {
+    if (loading) {
       return (
-          <div className="flex justify-center items-center min-h-screen mt-[80px]">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="p-6 bg-gray-50 min-h-screen animate-pulse">
+              <div className="h-8 w-48 bg-gray-200 rounded mb-6"></div>
+              <div className="h-64 bg-white rounded-lg border border-gray-100 mb-6"></div>
+              <div className="h-64 bg-white rounded-lg border border-gray-100"></div>
           </div>
       );
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen mt-[80px] mb-[60px]">
+    <div className="p-6 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Attendance Overview</h1>
@@ -111,13 +113,13 @@ export default function AttendancePage() {
       </div>
 
       {attendanceData.length === 0 ? (
-          <div className="bg-white p-10 rounded-lg shadow-sm text-center">
+          <div className="bg-white p-10 rounded-lg text-center">
               <p className="text-gray-500">No attendance records found.</p>
           </div>
       ) : (
         <>
             {/* Overall Attendance Section */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="bg-white rounded-lg border border-gray-100 p-6 mb-6">
                 <div className="flex flex-col md:flex-row items-center justify-between">
                 <div className="text-center md:text-left mb-4 md:mb-0">
                     <h2 className="text-lg font-semibold text-gray-900 mb-2">Overall Attendance</h2>
@@ -178,12 +180,12 @@ export default function AttendancePage() {
             </div>
 
             {/* Subject-wise Attendance */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="bg-white rounded-lg border border-gray-100 p-6 mb-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Subject-wise Attendance</h2>
                 <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50/50">
+                    <tr className="border-b border-gray-100 bg-gray-50/50">
                         <th className="text-left py-3 px-4 font-semibold text-gray-700">Subject</th>
                         <th className="text-center py-3 px-2 font-semibold text-gray-700">Total Classes</th>
                         <th className="text-center py-3 px-2 font-semibold text-gray-700">Attended</th>
@@ -215,7 +217,7 @@ export default function AttendancePage() {
             </div>
 
             {/* Low Attendance Alerts */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-lg border border-gray-100 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Attendance Alerts</h2>
                 
                 {attendanceData.filter(r => (r.attendedClasses/r.totalClasses * 100) < 75).length === 0 ? (
@@ -229,7 +231,7 @@ export default function AttendancePage() {
                              const percent = (record.attendedClasses / record.totalClasses) * 100;
                              const isCritical = percent < 65;
                              return (
-                                <div key={record.id} className={`border-l-4 ${isCritical ? 'border-red-400 bg-red-50' : 'border-yellow-400 bg-yellow-50'} p-4 rounded-r-lg shadow-sm`}>
+                                <div key={record.id} className={`border-l-4 ${isCritical ? 'border-red-400 bg-red-50' : 'border-yellow-400 bg-yellow-50'} p-4 rounded-r-lg`}>
                                     <div className="flex">
                                         <div className="flex-shrink-0">
                                             <svg className={`h-5 w-5 ${isCritical ? 'text-red-400' : 'text-yellow-400'}`} viewBox="0 0 20 20" fill="currentColor">

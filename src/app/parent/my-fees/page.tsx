@@ -75,7 +75,7 @@ export default function FeesPage() {
 
   if (loading) {
       return (
-        <div className="flex items-center justify-center min-h-screen mt-[80px]">
+        <div className="flex items-center justify-center min-h-screen">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
       );
@@ -93,7 +93,7 @@ export default function FeesPage() {
   }
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen mt-[80px] mb-[60px]">
+    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>

@@ -6,7 +6,8 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { auth } from "../../../config/firebaseConfig";
+import { auth, db } from "../../../config/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from "../../../context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -23,10 +24,20 @@ export default function StudentLogin() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!authLoading && user) {
-      // Redirect to Student dashboard
-      router.replace("/student/dashboard");
-    }
+    const checkExistingSession = async () => {
+      if (!authLoading && user) {
+        try {
+          const studentDocRef = doc(db, "students", user.uid);
+          const studentDocSnap = await getDoc(studentDocRef);
+          if (studentDocSnap.exists()) {
+            router.replace("/student/dashboard");
+          }
+        } catch (e) {
+          console.error("Session verification error:", e);
+        }
+      }
+    };
+    checkExistingSession();
   }, [user, authLoading, router]);
 
   const getErrorMessage = (errorCode: string) => {
@@ -61,6 +72,16 @@ export default function StudentLogin() {
         email,
         password,
       );
+
+      // Verify if the logged-in user is actually a student
+      const studentDocRef = doc(db, "students", userCredential.user.uid);
+      const studentDocSnap = await getDoc(studentDocRef);
+
+      if (!studentDocSnap.exists()) {
+        await auth.signOut();
+        throw { code: "auth/user-not-found" };
+      }
+
       console.log("✅ Logged in:", userCredential.user);
 
       toast.success("Welcome back! Redirecting...", { id: toastId });

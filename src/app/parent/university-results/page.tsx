@@ -162,14 +162,14 @@ export default function UniversityResultsPage() {
 
   if (loading) {
       return (
-          <div className="flex justify-center items-center min-h-screen mt-[80px] ml-[17vw] w-[83vw]">
+          <div className="flex justify-center items-center min-h-screen ml-[17vw] w-[83vw]">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
       );
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen mt-[80px] mb-[60px]  print:mt-0 print:bg-white">
+    <div className="p-6 bg-gray-50 min-h-screen  print:mt-0 print:bg-white">
       {/* Header */}
       <h1 className="text-2xl font-bold text-gray-900 mb-6 print:hidden">University Results</h1>
       <div className="hidden print:block mb-8 text-center">

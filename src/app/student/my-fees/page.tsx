@@ -116,16 +116,22 @@ export default function FeesPage() {
       }, 2000);
   }
 
-  if (loading) {
+    if (loading) {
       return (
-        <div className="flex items-center justify-center min-h-[60vh] mt-[80px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
+          <div className="p-6 bg-gray-50 min-h-screen animate-pulse">
+              <div className="h-8 w-48 bg-gray-200 rounded mb-6"></div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                  <div className="h-32 bg-white rounded-xl border border-gray-100"></div>
+                  <div className="h-32 bg-white rounded-xl border border-gray-100"></div>
+                  <div className="h-32 bg-white rounded-xl border border-gray-100"></div>
+              </div>
+              <div className="h-64 bg-white rounded-xl border border-gray-100"></div>
+          </div>
       );
   }
 
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen mt-[80px] mb-[60px]">
+    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -142,7 +148,7 @@ export default function FeesPage() {
 
       {/* Top Cards */}
       <div className="grid md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 flex flex-col justify-between">
           <div>
             <h2 className="text-gray-500 text-sm font-medium uppercase tracking-wide">Total Outstanding</h2>
             <p className="text-3xl font-bold text-gray-900 mt-2">₹{totalOutstanding.toLocaleString('en-IN')}</p>
@@ -152,7 +158,7 @@ export default function FeesPage() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 flex flex-col justify-between">
            <div>
             <h2 className="text-gray-500 text-sm font-medium uppercase tracking-wide">Next Due Date</h2>
             <p className="text-xl font-bold text-gray-900 mt-2">
@@ -168,7 +174,7 @@ export default function FeesPage() {
            )}
         </div>
 
-         <div className="bg-blue-600 p-6 rounded-2xl shadow-sm shadow-blue-200 text-white flex flex-col justify-between">
+         <div className="bg-blue-600 p-6 rounded-2xl-blue-200 text-white flex flex-col justify-between">
            <div>
             <h2 className="text-blue-100 text-sm font-medium uppercase tracking-wide">Secure Payment</h2>
             <p className="text-sm text-blue-50 mt-2 opacity-90">
@@ -180,7 +186,7 @@ export default function FeesPage() {
       </div>
 
       {/* Fee Breakdown */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div className="p-6 border-b border-gray-100">
             <h2 className="text-lg font-bold text-gray-900">Fee Breakdown</h2>
         </div>
@@ -225,7 +231,7 @@ export default function FeesPage() {
                                     <button 
                                         onClick={() => handlePay(fee)}
                                         disabled={!!processingId}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition shadow-sm shadow-blue-200 disabled:opacity-70 disabled:cursor-not-allowed"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-blue-200 disabled:opacity-70 disabled:cursor-not-allowed"
                                     >
                                         {processingId === fee.id ? "Processing..." : "Pay Now"}
                                     </button>
@@ -249,7 +255,7 @@ export default function FeesPage() {
 
        {/* Payment History (Filtered from fees for simplicity) */}
        {fees.some(f => f.status === 'paid') && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
                 <div className="p-6 border-b border-gray-100">
                     <h2 className="text-lg font-bold text-gray-900">Transaction History</h2>
                 </div>

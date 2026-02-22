@@ -210,16 +210,31 @@ export default function ProfileSettings() {
     }
   };
 
-  if (loading) {
+    if (loading) {
      return (
-        <div className="flex items-center justify-center min-h-[60vh] mt-[80px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="min-h-screen bg-gray-50 flex flex-col p-6 animate-pulse">
+          <div className="w-full">
+            <div className="h-10 w-48 bg-gray-200 rounded mb-2"></div>
+            <div className="h-4 w-64 bg-gray-200 rounded mb-8"></div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+               <div className="lg:col-span-1 space-y-6">
+                  <div className="bg-white rounded-2xl border border-gray-100 p-6 flex flex-col items-center">
+                      <div className="w-32 h-32 bg-gray-200 rounded-full mb-4"></div>
+                      <div className="h-6 w-32 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-4 w-48 bg-gray-200 rounded"></div>
+                  </div>
+               </div>
+               <div className="lg:col-span-2">
+                  <div className="bg-white rounded-2xl border border-gray-100 p-6 h-[400px]"></div>
+               </div>
+            </div>
+          </div>
         </div>
-     )
+     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col mt-[80px] p-6 mb-[50px]">
+    <div className="min-h-screen bg-gray-50 flex flex-col p-6">
         
       <div className="w-full">
           {/* Header */}
@@ -232,9 +247,9 @@ export default function ProfileSettings() {
             
             {/* Left Column: Photo & Core Info */}
             <div className="lg:col-span-1 space-y-6">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 text-center">
+                <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
                     <div className="relative inline-block mb-4 group">
-                        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-50 mx-auto relative">
+                        <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-50  relative">
                              {uploadingPhoto ? (
                                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
@@ -249,7 +264,7 @@ export default function ProfileSettings() {
                         </div>
                         <label 
                             htmlFor="photo-upload" 
-                            className="absolute bottom-0 right-2 p-2 bg-blue-600 text-white rounded-full cursor-pointer hover:bg-blue-700 transition shadow-lg"
+                            className="absolute bottom-0 right-2 p-2 bg-blue-600 text-white rounded-full cursor-pointer hover:bg-blue-700 transition"
                             title="Update Photo"
                         >
                             <IoCamera size={18}/>
@@ -279,7 +294,7 @@ export default function ProfileSettings() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <div className="bg-white rounded-2xl border border-gray-100 p-6">
                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Quick Actions</h3>
                    <div className="space-y-2">
                        <button 
@@ -298,7 +313,7 @@ export default function ProfileSettings() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     
                     {/* Basics */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <div className="bg-white rounded-2xl border border-gray-100 p-6">
                         <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
                             Personal Information
                         </h2>
@@ -342,7 +357,7 @@ export default function ProfileSettings() {
                     </div>
 
                     {/* Address */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <div className="bg-white rounded-2xl border border-gray-100 p-6">
                         <h2 className="text-lg font-bold text-gray-900 mb-6">Address & Location</h2>
                         <div className="space-y-4">
                             <div>
@@ -405,7 +420,7 @@ export default function ProfileSettings() {
                     </div>
 
                     {/* Security */}
-                     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                     <div className="bg-white rounded-2xl border border-gray-100 p-6">
                         <h2 className="text-lg font-bold text-gray-900 mb-6">Security Settings</h2>
                         <div className="space-y-4">
                             <div>
@@ -447,7 +462,7 @@ export default function ProfileSettings() {
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="flex justify-end gap-4 p-4 sticky bottom-0 bg-white/90 backdrop-blur-sm border-t border-gray-200 z-10 rounded-xl">
+                    <div className="flex justify-end gap-4 p-4 sticky bottom-0 bg-white/90 backdrop-blur-sm border-t border-gray-100 z-10 rounded-xl">
                         <button 
                             type="button"
                             onClick={() => window.location.reload()}
@@ -458,7 +473,7 @@ export default function ProfileSettings() {
                         <button 
                             type="submit"
                             disabled={saving}
-                            className="px-8 py-2 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="px-8 py-2 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition-blue-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             {saving ? (
                                 <><div className="animate-spin h-4 w-4 border-2 border-white rounded-full border-t-transparent"></div> Saving...</>
